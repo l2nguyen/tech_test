@@ -4,5 +4,3 @@ This visualizes the % of population with access to improved sanitation in differ
 ## Data Source
 Data was retrieved the from the [World Bank API](https://datahelpdesk.worldbank.org/knowledgebase/articles/898599-api-indicator-queries) using the query for a specific indicator.
 *Indicator code:* SH.STA.ACSN
-
-Test test
