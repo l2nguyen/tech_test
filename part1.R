@@ -1,10 +1,11 @@
-# SET UP ----------------------------------
+rm(list = ls())
+# Load necessary packages
 library(httr)
 library(jsonlite)
 library(dplyr)
-library(wbstats)
 
-# GET DATA FROM API ----------------------------------
+#---- GET DATA FROM API ------#
+
 # NOTE: There exists a few R packages that makes it easier to get
 # data from WB API: wbstats and WDI
 # Will do this the harder way for now.
@@ -31,6 +32,18 @@ str(wash_data)
 # Part 1 seems to only be information about number of obs and page
 wash_data <- wash_data[[2]]
 
+
+#--- Get basic data on country
+# NOTE: Mostly interested in income data
+country <- GET("http://api.worldbank.org/v2/countries/",
+              query = list(per_page = 2000, format = 'json'))
+
+# Prettify nested JSON data from API
+country_data <- fromJSON(content(country, "text"), flatten = TRUE)
+country_data <- country_data[[2]]
+
+#---- DATA WRANGLING ------#
+
 # Look at the columns in the data
 colnames(wash_data)
 
@@ -41,15 +54,6 @@ wash_data <- wash_data %>%
   rename(iso3c = countryiso3code, year = date,
          iso2c =  country.id, country = country.value) %>%
   filter(iso3c != "")
-
-#--- Get basic data on country
-# NOTE: Mostly interested in income data
-country <- GET("http://api.worldbank.org/v2/countries/",
-              query = list(per_page = 2000, format = 'json'))
-
-# Prettify nested JSON data from API
-country_data <- fromJSON(content(country, "text"), flatten = TRUE)
-country_data <- country_data[[2]]
 
 # Look at data structure
 str(country_data)
