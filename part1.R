@@ -1,10 +1,8 @@
 rm(list = ls())
 # Load necessary packages
-library(httr)
-library(jsonlite)
-library(dplyr)
-library(ggplot2)
-library(RColorBrewer)
+x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2", "ggmap")
+# install.packages(x) # warning: uncommenting this may take a number of minutes
+lapply(x, library, character.only = TRUE) # load the required packages
 
 #---- GET DATA FROM API ------#
 
@@ -102,16 +100,56 @@ countries <- wash_data %>%
   # drop observation where the indicator data is missing
   filter(!is.na(value))
 
+# Make data frame with the difference between 2015 and 1990 for each country
+changes <- countries %>%
+  # sort data
+  arrange(country, year) %>%
+  # group by country
+  group_by(country) %>%
+  # find difference between each row
+  mutate(diff = c(NA, diff(value))) %>%
+  group_by(country) %>%
+  # add all the differences up for net change over the years in each country
+  summarise(total_diff = sum(diff, na.rm = TRUE)) %>%
+  # arrange by the difference
+  arrange(total_diff)
+
 #---- VISUALIZE THE DATA ------#
 #-- Look at world data
-ggplot(data = subset(agg_df, country == "World"), aes(x = year, y = value, group = 1)) + geom_point() + geom_line() + scale_y_continuous(breaks=seq(50, 70,by = 2)) +
+ggplot(data = subset(agg_df, country == "World"),
+       aes(x = year, y = value, group = 1)) +
+  geom_point() + geom_line() +
+  scale_y_continuous(breaks=seq(50, 70,by = 2)) +
   labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access) for the World")
 
 #-- Look at regional data
-regions <- c("Caribbean small states", "East Asia & Pacific",
-             "Europe & Central Asia", "Latin America & Caribbean",
-             "Middle East & North Africa", "North America",
-             "South Asia", "Sub-Saharan Africa")
+regions <- c("Europe & Central Asia", "North America",
+             "Latin America & Caribbean", "Middle East & North Africa",
+             "South Asia", "East Asia & Pacific", "Sub-Saharan Africa")
 
-ggplot(data = subset(agg_df, country %in% regions), aes(x = year, y = value, group = country, color = country)) + geom_point() + geom_line() +
-  labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access) by Region")
+ggplot(data = subset(agg_df, country %in% regions),
+       aes(x = year, y = value, group = country, color = country)) +
+  geom_point() + geom_line() +
+  scale_y_continuous(breaks=seq(20, 100,by = 5)) +
+  labs(x = "Year", y = "% of Population with Access",
+       title = "Improved Sanitation Facilities (% of population with access) by Region")
+
+# -- look at by income level
+# Note: a country's income level classification can change in 1990-2015
+# So we are not looking at the same country every year.
+inc_levels <- c("Low income", "Lower middle income",
+             "Upper middle income", "High income")
+
+ggplot(data = subset(test, country %in% inc_levels),
+       aes(x = year, y = value, group = country, color = country)) +
+  geom_point() + geom_line() +
+  scale_y_continuous(breaks=seq(10, 100,by = 5)) +
+  labs(x = "Year", y = "% of Population with Access",
+       title = "Improved Sanitation Facilities (% of population with access) by Country Income Level")
+
+ggplot(data = subset(countries, regionID == "EAS"),
+       aes(x = year, y = value, group = country, color = country)) +
+  geom_point() + geom_line() +
+  scale_y_continuous(breaks=seq(0, 80,by = 5)) +
+  labs(x = "Year", y = "% of Population with Access",
+       title = "Improved Sanitation Facilities (% of population with access) by Country Income Level")
