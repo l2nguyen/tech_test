@@ -4,14 +4,15 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 library(ggplot2)
+library(RColorBrewer)
 
 #---- GET DATA FROM API ------#
 
 # Note: There exists a few R packages that makes it much easier to get
-# data from WB API: wbstats and WDI. They transform all the code below
+# data from WB API: wbstats and WDI. They both transform all the code below
 # into one a few lines of code.
 # easy way:
-# check <- WDI(country = 'all', indicator = 'SH.STA.ACSN',
+# full_data <- WDI(country = 'all', indicator = 'SH.STA.ACSN',
 # start = 1960, end = 2018, extra = TRUE, cache = NULL)
 # I will do this the harder way for this exercise.
 
@@ -55,17 +56,16 @@ colnames(wash_data)
 
 wash_data <- wash_data %>%
   # Select only necessary columns
-  select(1:3, indicator.id, starts_with("country.")) %>%
+  select(1:3, starts_with("country.")) %>%
   # Rename columns
   rename(iso3c = countryiso3code, year = date,
-         iso2c =  country.id, country = country.value) %>%
-  # Drop aggregated regional data
-  filter(iso3c != "")
+         iso2c =  country.id, country = country.value)
 
 # Check number of missing values
 sum(is.na(wash_data$value))
 # Note: About 50% of the data is missing a value for the sanitation indicator
 
+#--- Look at the character of missing data
 missing <- wash_data %>%
   filter(is.na(value))
 
@@ -88,13 +88,20 @@ country_data <- country_data %>%
          region = region.value, income_code = incomeLevel.id,
          income = incomeLevel.value)
 
+# make df with all the aggregate data
+agg_df<- wash_data %>% filter(iso3c == "")
+
 # Join the two dataset into the data that will be used for visualization
-full_data <- wash_data %>%
+countries <- wash_data %>%
   # join to country information by country code
   left_join(country_data, by = c("iso3c", "country")) %>%
+  # filter to only keep country data
+  filter(iso3c != "") %>%
   # drop observation where the indicator data is missing
   filter(!is.na(value))
 
 #---- VISUALIZE THE DATA ------#
-ggplot(data = full_data, aes(x = year, y = value, group = country, color=region)) +
-  geom_line()
+# Look at world data
+ggplot(data = subset(agg_df, country == "World"), aes(x = year, y = value, group = 1)) + geom_point() + geom_line() + scale_y_continuous(breaks=seq(50, 70,by = 2)) +
+  labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access)")
+
