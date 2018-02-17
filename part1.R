@@ -89,7 +89,9 @@ country_data <- country_data %>%
          income = incomeLevel.value)
 
 # make df with all the aggregate data
-agg_df<- wash_data %>% filter(iso3c == "")
+agg_df<- wash_data %>%
+  filter(iso3c == "") %>%
+  filter(!is.na(value))
 
 # Join the two dataset into the data that will be used for visualization
 countries <- wash_data %>%
@@ -101,7 +103,15 @@ countries <- wash_data %>%
   filter(!is.na(value))
 
 #---- VISUALIZE THE DATA ------#
-# Look at world data
+#-- Look at world data
 ggplot(data = subset(agg_df, country == "World"), aes(x = year, y = value, group = 1)) + geom_point() + geom_line() + scale_y_continuous(breaks=seq(50, 70,by = 2)) +
-  labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access)")
+  labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access) for the World")
 
+#-- Look at regional data
+regions <- c("Caribbean small states", "East Asia & Pacific",
+             "Europe & Central Asia", "Latin America & Caribbean",
+             "Middle East & North Africa", "North America",
+             "South Asia", "Sub-Saharan Africa")
+
+ggplot(data = subset(agg_df, country %in% regions), aes(x = year, y = value, group = country, color = country)) + geom_point() + geom_line() +
+  labs(x = "Year", y = "% of Population with Access", title = "Improved Sanitation Facilities (% of population with access) by Region")
