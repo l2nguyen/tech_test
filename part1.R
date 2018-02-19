@@ -1,6 +1,6 @@
 rm(list = ls())
 # Load necessary packages
-x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2", "ggmap")
+x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2")
 # install.packages(x) # warning: uncommenting this may take a number of minutes
 lapply(x, library, character.only = TRUE) # load the required packages
 
@@ -112,7 +112,8 @@ changes <- countries %>%
   # add all the differences up for net change over the years in each country
   summarise(total_diff = sum(diff, na.rm = TRUE)) %>%
   # arrange by the difference
-  arrange(total_diff)
+  arrange(total_diff) %>%
+  left_join(country_data, by = "country")
 
 #---- VISUALIZE THE DATA ------#
 #-- Look at world data
@@ -147,9 +148,12 @@ ggplot(data = subset(test, country %in% inc_levels),
   labs(x = "Year", y = "% of Population with Access",
        title = "Improved Sanitation Facilities (% of population with access) by Country Income Level")
 
-ggplot(data = subset(countries, regionID == "EAS"),
-       aes(x = year, y = value, group = country, color = country)) +
-  geom_point() + geom_line() +
-  scale_y_continuous(breaks=seq(0, 80,by = 5)) +
-  labs(x = "Year", y = "% of Population with Access",
-       title = "Improved Sanitation Facilities (% of population with access) by Country Income Level")
+ggplot(data = subset(changes, total_diff>20),
+       aes(x = reorder(country,total_diff),
+           y = total_diff,
+           fill = factor(region))) +
+  scale_y_continuous(breaks=seq(-20, 60, by = 5)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  labs(x = "Country", y = "Change in % of Population with Access to Improved Sanitation",
+       title = "Countries with the Largest Increase in % of Population with Access to Improved Sanitation between 1990 to 2015")
