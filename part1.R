@@ -71,6 +71,7 @@ missing <- wash_data %>%
 ggplot(data = missing, aes(x = year)) + geom_bar()
 # Note: Looks like all data is missing except for 1990-2015
 # Will just drop missing data for data for the purposes of this exercise
+wash_data <- wash_data %>% filter(!is.na(value))
 
 # Look at data structure
 str(country_data)
@@ -86,22 +87,8 @@ country_data <- country_data %>%
          region = region.value, income_code = incomeLevel.id,
          income = incomeLevel.value)
 
-# make df with all the aggregate data
-agg_df<- wash_data %>%
-  filter(iso3c == "") %>%
-  filter(!is.na(value))
-
-# Join the two dataset into the data that will be used for visualization
-countries <- wash_data %>%
-  # join to country information by country code
-  left_join(country_data, by = c("iso3c", "country")) %>%
-  # filter to only keep country data
-  filter(iso3c != "") %>%
-  # drop observation where the indicator data is missing
-  filter(!is.na(value))
-
 # Make data frame with the difference between 2015 and 1990 for each country
-changes <- countries %>%
+changes <- wash_data %>%
   # sort data
   arrange(country, year) %>%
   # group by country
@@ -110,10 +97,24 @@ changes <- countries %>%
   mutate(diff = c(NA, diff(value))) %>%
   group_by(country) %>%
   # add all the differences up for net change over the years in each country
-  summarise(total_diff = sum(diff, na.rm = TRUE)) %>%
+  summarise(total_diff = round(sum(diff, na.rm = TRUE), digits = 2)) %>%
   # arrange by the difference
   arrange(total_diff) %>%
-  left_join(country_data, by = "country")
+  left_join(country_data, by = "country") %>%
+  arrange(country)
+
+# make df with all the aggregate data
+agg_df<- wash_data %>%
+  filter(iso3c == "") %>%
+  select(-iso3c)
+
+# Join the two dataset into the data that will be used for visualization
+countries <- wash_data %>%
+  # join to country information by country code
+  left_join(country_data, by = c("iso3c", "country")) %>%
+  # filter to only keep country data
+  filter(iso3c != "") %>%
+  arrange(country, year)
 
 #---- VISUALIZE THE DATA ------#
 #-- Look at world data
@@ -150,8 +151,7 @@ ggplot(data = subset(test, country %in% inc_levels),
 
 ggplot(data = subset(changes, total_diff>20),
        aes(x = reorder(country,total_diff),
-           y = total_diff,
-           fill = factor(region))) +
+           y = total_diff)) +
   scale_y_continuous(breaks=seq(-20, 60, by = 5)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip() +
