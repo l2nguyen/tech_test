@@ -11,7 +11,7 @@ output:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
-x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2")
+x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2", "DT")
 # install.packages(x) # warning: uncommenting this may take a number of minutes
 lapply(x, library, character.only = TRUE) # load the required packages
 ```
@@ -106,7 +106,7 @@ changes <- wash_data %>%
   mutate(rank = ifelse(iso3c != "", rank(-total_diff, ties.method = "first"), NA))
 
 # make df with all the aggregate data
-final_df <- wash_data %>% left_join(changes, by = c("iso3c", "country"))
+final_df <- wash_data %>% left_join(changes, by = c("country"))
 
 regions <- c("Europe & Central Asia", "North America",
              "Latin America & Caribbean", "Middle East & North Africa",
@@ -125,7 +125,7 @@ inputPanel(
                           "10 Countries with Largest Decrease"),
               selected = "Region",
               width = "500px"),
-      downloadButton("downloadData", "Download Data"),
+      downloadButton("downloadData", "Download Data for Plot"),
       downloadButton("downloadPlot", "Download Plot")
 )
 
@@ -150,6 +150,15 @@ renderPlot({
   labs(x = "Year", y = "% of Population with Access",
        title = "Improved Sanitation Facilities (% of population with access)")
 })
+
+renderDT(
+  datatable(changes %>% filter(iso3c != "") %>% 
+              select(country, total_diff, region, income, rank) %>% arrange(rank),
+            colnames = c("Country", "Total Change (% points)", 
+                           "Region", "Income Level", "Rank"),
+            rownames = FALSE
+            )
+)
 
 output$downloadPlot <- downloadHandler(
     filename = function() { 
