@@ -3,7 +3,7 @@
 ## Guide
 ### Part 1
 The R markdown script can be found [here](part1.rmd).
-The output can be found [here](https://l2nguyen.shinyapps.io/sanitation/){:target="_blank"}.
+The output can be found [here](https://l2nguyen.shinyapps.io/sanitation/).
 
 ### Part 2
 The write up can be found [here](part2.md).
