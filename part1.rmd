@@ -126,18 +126,22 @@ The global trend for percentage of the population with access to improved sanita
 
 ### Graph and Data
 ```{r chart, dpi = 300, echo = FALSE}
+# Input panel
 inputPanel(
   selectInput("type", label = "Select group:",
               choices = c("Region", 
                           "Income Level", 
                           "10 Countries with Largest Increase", 
                           "10 Countries with Largest Decrease"),
-              selected = "Region",
+              selected = "10 Countries with Largest Increase",
               width = "500px"),
+  # allow users to download data
       downloadButton("downloadData", "Download Data for Plot"),
+  # allow users to download plot as png
       downloadButton("downloadPlot", "Download Plot")
 )
 
+# Make data frame for plot based on user input
 df <- reactive({
   if (input$type == "Region"){
     final_df %>% filter(country %in% regions) %>% select(year, value, iso2c, country)
@@ -162,6 +166,8 @@ renderPlot({
 ```
 
 ```{r table, echo = FALSE}
+# Display data table showing total change in indicator to
+# match plot
 dt_data <- reactive({
   if (input$type == "Region") {
     changes %>% filter(country %in% regions) %>% 
@@ -192,6 +198,7 @@ renderDT(
 ```
 
 ```{r download, echo = FALSE}
+# Download handler for plot
 output$downloadPlot <- downloadHandler(
     filename = function() { 
       paste("Access to Improved Sanitation by for ", 
@@ -201,7 +208,7 @@ output$downloadPlot <- downloadHandler(
                device = png(width = 10, height = 5, res = 300, units = "in"))
       }
 )
-
+# Download handlers for data
 output$downloadData <- downloadHandler(
     filename = function() {
       "sanitation.csv"
