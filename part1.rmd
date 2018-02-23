@@ -112,13 +112,8 @@ changes <- wash_data %>%
 # make df with all the aggregate data
 final_df <- wash_data %>% left_join(changes, by = c("country"))
 
-regions <- c("Europe & Central Asia", "North America",
-             "Latin America & Caribbean", "Middle East & North Africa",
-             "South Asia", "East Asia & Pacific", "Sub-Saharan Africa",
-             "World")
-
-inc_levels <- c("Low income", "Lower middle income",
-             "Upper middle income", "High income")
+# clean up work space
+rm(country, country_data, wash, wash_data, missing)
 ```
 
 ### Summary
@@ -126,6 +121,14 @@ The global trend for percentage of the population with access to improved sanita
 
 ### Graph and Data
 ```{r chart, dpi = 300, echo = FALSE}
+regions <- c("Europe & Central Asia", "North America",
+             "Latin America & Caribbean", "Middle East & North Africa",
+             "South Asia", "East Asia & Pacific", "Sub-Saharan Africa",
+             "World")
+
+inc_levels <- c("Low income", "Lower middle income",
+             "Upper middle income", "High income")
+
 # Input panel
 inputPanel(
   selectInput("type", label = "Select group:",
@@ -161,7 +164,7 @@ renderPlot({
   scale_y_continuous(breaks = seq(10, 100, by = 5)) +
   theme(legend.title=element_blank()) +
   labs(x = "Year", y = "% of population with access",
-  title = paste0("Improved Sanitation Facilities (% of population with access) for ", input$type))
+  title = paste0("Percent of Population with Access to Improved Sanitation Facilities for ", input$type))
 })
 ```
 
