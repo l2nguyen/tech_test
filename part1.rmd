@@ -159,7 +159,6 @@ renderPlot({
        aes(x = year, y = value, group = country, color = country)) +
   geom_point() + geom_line() +
   scale_y_continuous(breaks = seq(10, 100, by = 5)) +
-  theme(axis.text.x = element_text(angle = 90)) +
   theme(legend.title=element_blank()) +
   labs(x = "Year", y = "% of population with access",
   title = paste0("Improved Sanitation Facilities (% of population with access) for ", input$type))
