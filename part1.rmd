@@ -5,6 +5,7 @@ runtime: shiny
 output: 
   html_document:
     theme: "cerulean"
+    highlight: "default"
 ---
 
 ```{r setup, include = FALSE}
