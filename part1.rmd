@@ -10,9 +10,12 @@ output:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
-x <- c("httr", "jsonlite", "dplyr", "tidyr", "ggplot2", "DT")
-# install.packages(x) # warning: uncommenting this may take a number of minutes
-lapply(x, library, character.only = TRUE) # load the required packages
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(DT)
 ```
 
 ```{r get_data, include = FALSE}
